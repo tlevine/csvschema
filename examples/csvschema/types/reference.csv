@@ -1,0 +1,4 @@
+property,value
+title,Reference
+inherits,types/string.csv
+description,This is a reference to another entity in the CSV schema. If the reference string starts with a protocal (like `http://`), use that protocal to look up the entity; otherwise, look for a file on the local filesystem with the appropriate path.
