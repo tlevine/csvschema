@@ -5,20 +5,20 @@ It's built on top of CSV files.
 There are two tables.
 
 1. The datasets table
-2. The columns table
+2. The column types table
 
 These are canonically represented as separate files for each dataset or column,
 but there is a standard (and simple) way of combining them into just two files.
 
 ## Canonical representation
 
-### Columns
+### Column types
 You specify each column type with a series of properties in a two-column table.
 
-    $ cat columns/zipcode.csv
+    $ cat types/zipcode.csv
     property,value
     title,United States Zip Code
-    inherits,columns/string.csv
+    inherits,types/string.csv
     regex,[0-9]{5}(?:-[0-9]{4})?
 
 ### Tables
@@ -29,14 +29,16 @@ the column (`type`).
 
     $ cat tables/addresses.csv
     colname,    type
-    name,       columns/fullname.csv
-    street,     columns/string.csv
-    town,       columns/string.csv
-    zip,        columns/zipcode.csv
+    name,       types/fullname.csv
+    street,     types/string.csv
+    town,       types/string.csv
+    zip,        types/zipcode.csv
+
+## Two-file version
 
 ## Identifiers
-The values for `inherits` and `type` (as you've seen above) and for `dataset`
-(as you'll see below) can be whatever you want, actually. But a csvschema
+The values for `inherits`, `type` and `table` (as you've seen above)
+can be whatever you want, actually. But a csvschema
 parser will do fancy things if you use URIs or file paths. If a csvschema
 parser, validator, &c. chooses to do anything fancy with these references,
 here is how it should resolve them.
@@ -71,10 +73,7 @@ In that case, you can specify your own function.
 
 ```R
 validate('data/subscribers.csv', 'address', func = function(id, kind){
-  # `kind` is either "column" or "table".
+  # `kind` is either "type" or "table".
   sqldf(paste('SELECT * FROM,kind,'WHERE "id" = \'',id,'\''), dbname = 'foo.sqlite')
 })
 ```
-
-Thus, you may use any identifier
-you want. For example,
