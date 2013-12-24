@@ -21,6 +21,9 @@ You specify each column type with a series of properties in a two-column table.
     inherits,types/string.csv
     regex,[0-9]{5}(?:-[0-9]{4})?
 
+The `property` column should act as an index (primary key); that is, it should
+contain no duplicate values.
+
 ### Tables
 Each dataset is represented by a series of columns, ordered as they should
 appear in a data table following the schema. For each column, you specify the
@@ -34,7 +37,25 @@ the column (`type`).
     town,       types/string.csv
     zip,        types/zipcode.csv
 
+The `colname` field should act as an index (primary key). That is, it should
+contain no duplicate values.
+
 ## Two-file version
+In the canonical version, we're effectively indexing by filename and then by
+`property` or `colname`. We represent this in two files by moving the identifier
+from the filename to a new column called `tableid` or `typeid`. For example,
+
+    $ cat tables.csv
+    tableid,  colname,    type
+    addresses,name,       types/fullname.csv
+    addresses,street,     types/string.csv
+    addresses,town,       types/string.csv
+    addresses,zip,        types/zipcode.csv
+    pizza,    name,       types/string.csv
+    pizza,    street,     types/string.csv 
+    pizza,    town,       types/string.csv
+    pizza,    zip,        types/zipcode.csv
+    pizza,    rating,     types/integer.csv
 
 ## Identifiers
 The values for `inherits`, `type` and `table` (as you've seen above)
