@@ -21,13 +21,13 @@ You specify each column type with a series of properties in a two-column table.
     inherits,columns/string.csv
     regex,[0-9]{5}(?:-[0-9]{4})?
 
-### Datasets
+### Tables
 Each dataset is represented by a series of columns, ordered as they should
 appear in a data table following the schema. For each column, you specify the
 column name that should be used in the data table (`colname`) and the type of
 the column (`type`).
 
-    $ cat columns/subscribers.csv
+    $ cat tables/addresses.csv
     colname,    type
     name,       columns/fullname.csv
     street,     columns/string.csv
@@ -35,4 +35,46 @@ the column (`type`).
     zip,        columns/zipcode.csv
 
 ## Identifiers
-The values for `inherits` and `type` (as you've seen above) and for `
+The values for `inherits` and `type` (as you've seen above) and for `dataset`
+(as you'll see below) can be whatever you want, actually. But a csvschema
+parser will do fancy things if you use URIs or file paths. If a csvschema
+parser, validator, &c. chooses to do anything fancy with these references,
+here is how it should resolve them.
+
+The parser should accept an arbitrary for this lookup. For example, let's
+say there's a `validate` function written in R. Here's how we might validate
+a particular dataset called `subscribers.csv`
+
+```R
+validate('data/subscribers.csv', 'tables/addresses.csv', func = read.csv)
+```
+
+This means that references in the two different tables will be resolved by
+calling `read.csv` on the reference string, which is always a file in this
+case. In R, `read.csv`, also handles web URLs. Specifically, it does this.
+
+1. Check for a protocal (like `http://`). If the reference string contains
+    one, use that protocal to look up the data table.
+2. If it doesn't contain a protocal, try looking up the data table as a
+    file on the local filesystem.
+
+This sort of function should be the default function in a csvschema
+parser/validator; that is, this should do the same thing.
+
+```R
+validate('data/subscribers.csv', 'tables/addresses.csv')
+```
+
+You could choose to store your schemas and whatnot in some custom place,
+like a relational database or a hosting service that requires authentication.
+In that case, you can specify your own function.
+
+```R
+validate('data/subscribers.csv', 'address', func = function(id, kind){
+  # `kind` is either "column" or "table".
+  sqldf(paste('SELECT * FROM,kind,'WHERE "id" = \'',id,'\''), dbname = 'foo.sqlite')
+})
+```
+
+Thus, you may use any identifier
+you want. For example,
